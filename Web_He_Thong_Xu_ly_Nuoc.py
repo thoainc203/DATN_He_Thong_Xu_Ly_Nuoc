@@ -1,78 +1,76 @@
 import streamlit as st
-from datetime import datetime
-import random
 
-st.set_page_config(page_title="Wastewater Treatment WebApp", layout="wide")
+# --- Thiết lập giao diện ---
+st.set_page_config(page_title="Hệ Thống Xử Lý Nước Thải", layout="wide")
 
-# --- LOGO ---
-st.image("logo.png", width=120)  # Logo trường
+# --- Logo và tiêu đề ---
+col_logo, col_title = st.columns([1, 5])
+with col_logo:
+    st.image("logo.png", width=100)
+with col_title:
+    st.markdown("### FACULTY OF INTERNATIONAL EDUCATION")
+    st.markdown("<h1 style='color: #008080;'>HỆ THỐNG XỬ LÝ NƯỚC THẢI</h1>", unsafe_allow_html=True)
 
-# --- CHỌN NGÔN NGỮ ---
-lang = st.sidebar.selectbox("🌐 Language / Ngôn ngữ", ["Tiếng Việt", "English"])
-vi = lang == "Tiếng Việt"
+# --- Đăng nhập ---
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
 
-def _(vi_text, en_text):
-    return vi_text if vi else en_text
-
-# --- ĐĂNG NHẬP ---
-def login():
-    st.sidebar.markdown("### 🔐 " + _("Đăng nhập", "Login"))
-    password = st.sidebar.text_input(_("Nhập mật khẩu:", "Enter password:"), type="password")
+if not st.session_state.authenticated:
+    st.subheader("🔐 Đăng nhập hệ thống")
+    password = st.text_input("Nhập mật khẩu", type="password")
     if password == "1234":
-        return True
+        st.session_state.authenticated = True
+        st.success("✅ Đăng nhập thành công!")
+        st.experimental_rerun()
     elif password:
-        st.sidebar.error(_("Sai mật khẩu!", "Incorrect password!"))
-        return False
-    return False
-
-if not login():
+        st.error("❌ Mật khẩu không đúng.")
     st.stop()
 
-# --- ĐIỀU KHIỂN ĐỘNG CƠ ---
-st.markdown("## 🚦 " + _("Điều khiển động cơ", "Motor Control"))
+# --- Điều khiển động cơ ---
+st.subheader("🛠️ Điều Khiển Động Cơ")
 col1, col2 = st.columns(2)
-
 with col1:
-    motor1 = st.button(_("BẬT BƠM NƯỚC 1", "TURN ON PUMP 1"))
-    motor2 = st.button(_("TẮT BƠM NƯỚC 1", "TURN OFF PUMP 1"))
-
+    if st.button("Bật máy bơm"):
+        st.success("✅ Máy bơm đã bật")
 with col2:
-    motor3 = st.button(_("BẬT BƠM NƯỚC 2", "TURN ON PUMP 2"))
-    motor4 = st.button(_("TẮT BƠM NƯỚC 2", "TURN OFF PUMP 2"))
+    if st.button("Tắt máy bơm"):
+        st.warning("⚠️ Máy bơm đã tắt")
 
-# --- THEO DÕI THÔNG SỐ VÀ GIAI ĐOẠN ---
-st.markdown("## 📊 " + _("Theo dõi chất lượng nước & Giai đoạn xử lý", "Water Parameters Monitoring & Treatment Stage"))
+# --- Theo dõi thông số ---
+st.subheader("📈 Theo Dõi Thông Số Nước")
 
-ph = round(random.uniform(6.5, 8.5), 2)
-turbidity = round(random.uniform(0, 5), 2)
-temp = round(random.uniform(25, 35), 1)
+ph = st.slider("pH", 0.0, 14.0, 7.0)
+turbidity = st.slider("Độ đục (NTU)", 0.0, 100.0, 30.0)
+temperature = st.slider("Nhiệt độ (°C)", 0.0, 100.0, 25.0)
 
-st.write(_("- Độ pH:", "- pH level:"), ph)
-st.write(_("- Độ đục (NTU):", "- Turbidity (NTU):"), turbidity)
-st.write(_("- Nhiệt độ (°C):", "- Temperature (°C):"), temp)
+# --- So sánh với tiêu chuẩn ---
+st.subheader("📊 So Sánh Với Tiêu Chuẩn")
 
-if 6.5 <= ph <= 8.5 and turbidity < 5 and 25 <= temp <= 35:
-    st.success(_("✔️ Nước đạt chuẩn theo QCVN.", "✔️ Water meets QCVN standards."))
+ph_ok = 6.5 <= ph <= 8.5
+turbidity_ok = turbidity <= 50
+temp_ok = 20 <= temperature <= 35
+
+col_ph, col_turbidity, col_temp = st.columns(3)
+
+with col_ph:
+    st.metric("pH", ph, "✅" if ph_ok else "❌")
+with col_turbidity:
+    st.metric("Độ đục (NTU)", turbidity, "✅" if turbidity_ok else "❌")
+with col_temp:
+    st.metric("Nhiệt độ (°C)", temperature, "✅" if temp_ok else "❌")
+
+# --- Giai đoạn xử lý nước ---
+st.subheader("🌀 Giai Đoạn Xử Lý Nước")
+
+if not ph_ok or not turbidity_ok or not temp_ok:
+    stage = "⚠️ Đang xử lý - Thông số chưa đạt chuẩn"
+elif 6.5 <= ph <= 7.5 and turbidity <= 10 and 20 <= temperature <= 30:
+    stage = "✅ Hoàn tất xử lý - Nước đạt chuẩn"
 else:
-    st.error(_("❌ Nước KHÔNG đạt chuẩn!", "❌ Water does NOT meet standards!"))
+    stage = "♻️ Đang lọc và xử lý"
 
-st.markdown("### 🔄 " + _("Giai đoạn xử lý hiện tại:", "Current treatment stage:"))
-processing_stage = random.choice([
-    _("Lắng sơ cấp", "Primary Sedimentation"),
-    _("Lọc sinh học", "Biological Filtration"),
-    _("Khử trùng", "Disinfection"),
-    _("Lắng thứ cấp", "Secondary Sedimentation")
-])
-st.info(processing_stage)
+st.info(f"Giai đoạn hiện tại: **{stage}**")
 
-# --- HIỂN THỊ DỮ LIỆU CẢM BIẾN (cuối giao diện) ---
-st.markdown("---")
-st.markdown("## 📥 " + _("Dữ liệu cảm biến nhận được", "Sensor Data Received"))
-
-sensor_data = {
-    _("pH", "pH"): ph,
-    _("Độ đục", "Turbidity"): turbidity,
-    _("Nhiệt độ", "Temperature"): temp
-}
-
-st.table(sensor_data)
+# --- Hiển thị dữ liệu nhận được (đặt cuối giao diện) ---
+st.subheader("📥 Dữ Liệu Nhận Được (giả lập)")
+st.text_area("Dữ liệu từ cảm biến hoặc hệ thống", height=150)
