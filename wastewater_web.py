@@ -5,7 +5,7 @@ import random
 from PIL import Image
 import os
 import json
-from streamlit_autorefresh import st_autorefresh
+#from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="Wastewater Treatment WebApp", layout="wide")
 st_autorefresh(interval=3600 * 1000, key="refresh")
@@ -103,4 +103,5 @@ esp_data = {
     "temp": sensor_temp
 }
 st.code(esp_data, language="json")
+
 
