@@ -34,7 +34,7 @@ with st.container():
     with col2:
         st.markdown("""
             <div style='text-align: left; padding-top: 10px'>
-                <h1 style='color:#0072B2; margin-bottom: 5px;'>HỆ THỐNG XỬ LÝ NƯỚC THẢI 💧</h1>
+                <h1 style='color:#0072B2; margin-bottom: 5px;'>HỆ THỐNG XỬ LÝ NƯỚC THẢI </h1>
                 <h4 style='color: gray;'>FACULTY OF INTERNATIONAL EDUCATION</h4>
             </div>
         """, unsafe_allow_html=True)
@@ -124,3 +124,4 @@ st.markdown(
     "<center><small>© 2025 - Thiết kế bởi Sinh viên Kỹ thuật - Trường Đại học SPKT TP.HCM</small></center>",
     unsafe_allow_html=True
 )
+
