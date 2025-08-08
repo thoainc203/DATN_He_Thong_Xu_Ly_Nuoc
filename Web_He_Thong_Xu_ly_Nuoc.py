@@ -22,16 +22,6 @@ st.markdown(f" { _('Thời gian hiện tại', 'Current time') }: {now.strftime(
 # --- THÔNG BÁO ---
 st.info(_(" Hệ thống đang chờ dữ liệu từ cảm biến ESP32 hoặc người dùng nhập tay.", " System is waiting for sensor data from ESP32 or manual input."))
 
-# --- HIỂN THỊ DỮ LIỆU NHẬN ĐƯỢC ---
-st.subheader(_(" Dữ liệu nhận từ ESP32", " Data received from ESP32"))
-st.code({
-    "time": now.strftime('%H:%M:%S'),
-    "pH": "N/A",
-    "turbidity": "N/A",
-    "temperature": "N/A",
-    "status": "Waiting for data..."
-}, language="json")
-
 # --- ĐIỀU KHIỂN ĐỘNG CƠ ---
 st.subheader(_("🚀 Điều khiển động cơ", "🚀 Remote Motor Control"))
 esp32_ip = st.text_input(_("🔗 Nhập địa chỉ IP của ESP32:", "🔗 Enter ESP32 IP address:"), "http://192.168.1.100")
@@ -57,3 +47,14 @@ with col2:
         except Exception as e:
             st.error(_("❌ Không thể kết nối đến ESP32.", "❌ Cannot connect to ESP32."))
             st.exception(e)
+
+# --- HIỂN THỊ DỮ LIỆU NHẬN ĐƯỢC (ĐƯA XUỐNG CUỐI) ---
+st.markdown("---")
+st.subheader(_("📥 Dữ liệu nhận từ ESP32", "📥 Data received from ESP32"))
+st.code({
+    "time": now.strftime('%H:%M:%S'),
+    "pH": "N/A",
+    "turbidity": "N/A",
+    "temperature": "N/A",
+    "status": "Waiting for data..."
+}, language="json")
