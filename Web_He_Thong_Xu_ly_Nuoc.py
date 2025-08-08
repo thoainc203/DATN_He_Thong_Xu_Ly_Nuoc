@@ -15,7 +15,7 @@ st.markdown(f"<h2 style='text-align: center;'> { _('Hệ thống xử lý nướ
 
 # --- THỜI GIAN HIỆN TẠI ---
 now = datetime.now()
-st.markdown(f"** { _('Thời gian hiện tại', 'Current time') }:** {now.strftime('%d/%m/%Y – %H:%M:%S')}")
+st.markdown(f"** { _('Thời gian hiện tại', 'Current time') }:** {now.strftime('%H:%M:%S')}")
 
 # --- THÔNG BÁO ---
 st.info(_(" Hệ thống đang chờ dữ liệu từ cảm biến ESP32 hoặc người dùng nhập tay.", " System is waiting for sensor data from ESP32 or manual input."))
@@ -29,3 +29,4 @@ st.code({
     "temperature": "N/A",
     "status": "Waiting for data..."
 }, language="json")
+
