@@ -2,24 +2,23 @@ import streamlit as st
 from datetime import datetime
 import requests
 
-# --- CẤU HÌNH TRANG ---
+# --- Cấu hình giao diện ---
 st.set_page_config(page_title="Wastewater Treatment WebApp", layout="wide")
 
-# --- YÊU CẦU MẬT KHẨU ---
+# --- Kiểm tra mật khẩu ---
 def check_password():
     def password_entered():
         if st.session_state["password"] == "123456":
             st.session_state["password_correct"] = True
-            del st.session_state["password"]
         else:
             st.session_state["password_correct"] = False
 
     if "password_correct" not in st.session_state:
-        st.text_input("Nhập mật khẩu:", type="password", on_change=password_entered, key="password")
+        st.text_input("🔐 Nhập mật khẩu:", type="password", on_change=password_entered, key="password")
         return False
     elif not st.session_state["password_correct"]:
-        st.text_input("Nhập mật khẩu:", type="password", on_change=password_entered, key="password")
-        st.error("Sai mật khẩu!")
+        st.text_input("🔐 Nhập mật khẩu:", type="password", on_change=password_entered, key="password")
+        st.error("❌ Sai mật khẩu!")
         return False
     else:
         return True
@@ -27,91 +26,101 @@ def check_password():
 if not check_password():
     st.stop()
 
-# --- LOGO VÀ TIÊU ĐỀ ---
-col1, col2 = st.columns([1, 6])
-with col1:
-    st.image("logo.png", width=100)
-with col2:
-    st.markdown("""
-        <h1 style='margin-bottom: 0;'>Hệ Thống Xử Lý Nước Thải</h1>
-        <h4 style='margin-top: 0;'>FACULTY OF INTERNATIONAL EDUCATION</h4>
-    """, unsafe_allow_html=True)
+# --- Giao diện tiêu đề logo ---
+with st.container():
+    col1, col2 = st.columns([1, 8])
+    with col1:
+        st.image("logo.png", width=100)
+    with col2:
+        st.markdown("""
+            <div style='text-align: left; padding-top: 10px'>
+                <h1 style='color:#0072B2; margin-bottom: 5px;'>HỆ THỐNG XỬ LÝ NƯỚC THẢI 💧</h1>
+                <h4 style='color: gray;'>FACULTY OF INTERNATIONAL EDUCATION</h4>
+            </div>
+        """, unsafe_allow_html=True)
 
-# --- CHỌN NGÔN NGỮ ---
-lang = st.sidebar.selectbox("🌐 Language / Ngôn ngữ", ["Tiếng Việt", "English"])
-vi = lang == "Tiếng Việt"
-def _(vi_text, en_text): return vi_text if vi else en_text
+# --- Thời gian hiện tại ---
+st.markdown(f"⏰ <i>{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</i>", unsafe_allow_html=True)
+st.markdown("---")
 
-# --- THỜI GIAN ---
-now = datetime.now()
-st.write(f"⏰ { _('Thời gian hiện tại', 'Current time') }: {now.strftime('%d/%m/%Y %H:%M:%S')}")
+# --- Điều khiển động cơ ---
+with st.expander("🛠️ Điều khiển động cơ"):
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🟢 BẬT BƠM"):
+            try:
+                requests.get("http://192.168.1.100/pump?state=on")
+                st.success("✅ Đã gửi yêu cầu bật bơm.")
+            except:
+                st.error("❌ Không thể kết nối ESP32.")
+    with col2:
+        if st.button("🔴 TẮT BƠM"):
+            try:
+                requests.get("http://192.168.1.100/pump?state=off")
+                st.success("✅ Đã gửi yêu cầu tắt bơm.")
+            except:
+                st.error("❌ Không thể kết nối ESP32.")
 
-# --- ĐIỀU KHIỂN ĐỘNG CƠ ---
-st.subheader(_("🔧 Điều khiển động cơ", "🔧 Motor Control"))
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button(_("Bật bơm nước 💧", "Turn ON Pump 💧")):
-        try:
-            requests.get("http://192.168.1.100/pump?state=on")
-            st.success(_("Đã gửi yêu cầu bật bơm.", "Pump ON command sent."))
-        except:
-            st.error(_("Không thể kết nối ESP32.", "Failed to connect to ESP32."))
-
-with col2:
-    if st.button(_("Tắt bơm nước 🛑", "Turn OFF Pump 🛑")):
-        try:
-            requests.get("http://192.168.1.100/pump?state=off")
-            st.success(_("Đã gửi yêu cầu tắt bơm.", "Pump OFF command sent."))
-        except:
-            st.error(_("Không thể kết nối ESP32.", "Failed to connect to ESP32."))
-
-# --- THEO DÕI THÔNG SỐ CẢM BIẾN ---
-st.subheader(_("📊 Theo dõi thông số cảm biến", "📊 Sensor Monitoring"))
-
-# Giả lập dữ liệu
+# --- Dữ liệu cảm biến ---
+st.markdown("## 📈 Giám sát thông số cảm biến")
 ph = 7.2
-turbidity = 3.5  # NTU
+turbidity = 2.8
 temperature = 29.5
 
 col1, col2, col3 = st.columns(3)
-col1.metric("pH", f"{ph}", "6.5 - 8.5")
-col2.metric(_("Độ đục (NTU)", "Turbidity (NTU)"), f"{turbidity}", "< 5")
-col3.metric(_("Nhiệt độ (°C)", "Temperature (°C)"), f"{temperature}", "25 - 35")
+col1.metric("🌡️ pH", f"{ph}", "6.5 - 8.5")
+col2.metric("🌀 Độ đục (NTU)", f"{turbidity}", "< 5")
+col3.metric("🌡️ Nhiệt độ (°C)", f"{temperature}", "25 - 35")
 
-# --- SO SÁNH VỚI TIÊU CHUẨN ---
-st.markdown("### 🧪 " + _("So sánh với tiêu chuẩn nước", "Water Quality Standards"))
-if 6.5 <= ph <= 8.5:
-    st.success(_("pH đạt tiêu chuẩn.", "pH is within standard range."))
-else:
-    st.error(_("pH không đạt tiêu chuẩn!", "pH is out of range!"))
+# --- So sánh tiêu chuẩn ---
+st.markdown("## ✅ Kiểm tra theo tiêu chuẩn nước")
+col1, col2, col3 = st.columns(3)
 
-if turbidity < 5:
-    st.success(_("Độ đục đạt tiêu chuẩn.", "Turbidity is acceptable."))
-else:
-    st.error(_("Độ đục vượt ngưỡng!", "Turbidity too high!"))
+with col1:
+    if 6.5 <= ph <= 8.5:
+        st.success("✔️ pH đạt chuẩn.")
+    else:
+        st.error("⚠️ pH vượt giới hạn!")
 
-if 25 <= temperature <= 35:
-    st.success(_("Nhiệt độ ổn định.", "Temperature is normal."))
-else:
-    st.warning(_("Nhiệt độ bất thường!", "Abnormal temperature!"))
+with col2:
+    if turbidity < 5:
+        st.success("✔️ Độ đục đạt chuẩn.")
+    else:
+        st.error("⚠️ Độ đục cao!")
 
-# --- HIỂN THỊ GIAI ĐOẠN XỬ LÝ ---
-st.markdown("### 🔄 " + _("Giai đoạn xử lý nước", "Treatment Stage"))
+with col3:
+    if 25 <= temperature <= 35:
+        st.success("✔️ Nhiệt độ ổn định.")
+    else:
+        st.warning("⚠️ Nhiệt độ không bình thường!")
 
-# Giả lập trạng thái
-giai_doan = "Lắng"  # Có thể là: Tiếp nhận -> Lắng -> Lọc -> Khử trùng -> Xả thải
+# --- Giai đoạn xử lý ---
+st.markdown("## 🔄 Giai đoạn xử lý hiện tại")
+giai_doan = "Khử trùng"  # Thay đổi được tùy hệ thống
+giai_doan_map = {
+    "Tiếp nhận": "📥",
+    "Lắng": "🧪",
+    "Lọc": "🧼",
+    "Khử trùng": "☢️",
+    "Xả thải": "🏞️"
+}
+icon = giai_doan_map.get(giai_doan, "🔄")
+st.info(f"{icon} Đang ở giai đoạn: **{giai_doan}**")
 
-st.info(f"🔃 { _('Đang ở giai đoạn', 'Current stage') }: **{giai_doan}**")
-
-# --- HIỂN THỊ DỮ LIỆU NHẬN TỪ ESP32 ---
+# --- Hiển thị dữ liệu ESP32 ---
 st.markdown("---")
-st.subheader(_("📥 Dữ liệu nhận từ ESP32", "📥 Data received from ESP32"))
+with st.expander("📥 Dữ liệu mới nhất từ ESP32"):
+    st.code({
+        "time": datetime.now().strftime('%H:%M:%S'),
+        "pH": ph,
+        "turbidity": turbidity,
+        "temperature": temperature,
+        "status": "Connected"
+    }, language="json")
 
-st.code({
-    "time": now.strftime('%H:%M:%S'),
-    "pH": ph,
-    "turbidity": turbidity,
-    "temperature": temperature,
-    "status": "Connected"
-}, language="json")
+# --- Footer ---
+st.markdown("---")
+st.markdown(
+    "<center><small>© 2025 - Thiết kế bởi Sinh viên Kỹ thuật - Trường Đại học SPKT TP.HCM</small></center>",
+    unsafe_allow_html=True
+)
