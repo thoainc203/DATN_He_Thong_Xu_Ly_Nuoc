@@ -11,7 +11,7 @@ def _(vi_text, en_text):
     return vi_text if vi else en_text
 
 # --- TIÊU ĐỀ ---
-st.markdown(f"<h2 style='text-align: center;'>💧 { _('Hệ thống xử lý nước thải thông minh', 'Smart Wastewater Treatment System') } 💧</h2>", unsafe_allow_html=True)
+st.markdown(f"<h2 style='text-align: center;'> { _('Hệ thống xử lý nước thải thông minh', 'Smart Wastewater Treatment System') } </h2>", unsafe_allow_html=True)
 
 # --- THỜI GIAN HIỆN TẠI ---
 now = datetime.now()
@@ -29,3 +29,4 @@ st.code({
     "temperature": "N/A",
     "status": "Waiting for data..."
 }, language="json")
+
