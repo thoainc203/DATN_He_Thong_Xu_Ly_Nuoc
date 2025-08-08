@@ -1,81 +1,78 @@
 import streamlit as st
+from datetime import datetime
+import random
 
-# --- Authentication ---
-def check_password():
-    def password_entered():
-        if st.session_state["password"] == "123456":
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]
-        else:
-            st.session_state["password_correct"] = False
+st.set_page_config(page_title="Wastewater Treatment WebApp", layout="wide")
 
-    if "password_correct" not in st.session_state:
-        st.text_input("Nhập mật khẩu để truy cập:", type="password", on_change=password_entered, key="password")
-        return False
-    elif not st.session_state["password_correct"]:
-        st.text_input("Nhập mật khẩu để truy cập:", type="password", on_change=password_entered, key="password")
-        st.error("Sai mật khẩu, vui lòng thử lại.")
-        return False
-    else:
+# --- LOGO ---
+st.image("logo.png", width=120)  # Logo trường
+
+# --- CHỌN NGÔN NGỮ ---
+lang = st.sidebar.selectbox("🌐 Language / Ngôn ngữ", ["Tiếng Việt", "English"])
+vi = lang == "Tiếng Việt"
+
+def _(vi_text, en_text):
+    return vi_text if vi else en_text
+
+# --- ĐĂNG NHẬP ---
+def login():
+    st.sidebar.markdown("### 🔐 " + _("Đăng nhập", "Login"))
+    password = st.sidebar.text_input(_("Nhập mật khẩu:", "Enter password:"), type="password")
+    if password == "1234":
         return True
+    elif password:
+        st.sidebar.error(_("Sai mật khẩu!", "Incorrect password!"))
+        return False
+    return False
 
-if check_password():
-    # Giao diện chính
-    st.set_page_config(layout="wide")
-    st.title("🛠️ Điều khiển hệ thống xử lý nước thải")
+if not login():
+    st.stop()
 
-    # Điều khiển động cơ
-    st.subheader("🔌 Điều khiển động cơ")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Bật bơm nước"):
-            st.success("✅ Đã bật bơm nước")
-            # Gửi lệnh đến thiết bị ở đây
+# --- ĐIỀU KHIỂN ĐỘNG CƠ ---
+st.markdown("## 🚦 " + _("Điều khiển động cơ", "Motor Control"))
+col1, col2 = st.columns(2)
 
-    with col2:
-        if st.button("Tắt bơm nước"):
-            st.warning("🛑 Đã tắt bơm nước")
-            # Gửi lệnh đến thiết bị ở đây
+with col1:
+    motor1 = st.button(_("BẬT BƠM NƯỚC 1", "TURN ON PUMP 1"))
+    motor2 = st.button(_("TẮT BƠM NƯỚC 1", "TURN OFF PUMP 1"))
 
-    st.markdown("---")
+with col2:
+    motor3 = st.button(_("BẬT BƠM NƯỚC 2", "TURN ON PUMP 2"))
+    motor4 = st.button(_("TẮT BƠM NƯỚC 2", "TURN OFF PUMP 2"))
 
-    # Theo dõi thông số chất lượng nước
-    st.subheader("📊 Theo dõi thông số nước")
-    col3, col4, col5 = st.columns(3)
-    with col3:
-        ph = st.slider("pH", 0.0, 14.0, 7.0)
-        if ph < 6.5 or ph > 8.5:
-            st.error("❌ pH nằm ngoài tiêu chuẩn (6.5 - 8.5)")
-        else:
-            st.success("✅ pH đạt chuẩn")
+# --- THEO DÕI THÔNG SỐ VÀ GIAI ĐOẠN ---
+st.markdown("## 📊 " + _("Theo dõi chất lượng nước & Giai đoạn xử lý", "Water Parameters Monitoring & Treatment Stage"))
 
-    with col4:
-        turbidity = st.slider("Độ đục (NTU)", 0.0, 100.0, 5.0)
-        if turbidity > 10:
-            st.error("❌ Độ đục cao, cần xử lý")
-        else:
-            st.success("✅ Độ đục trong giới hạn cho phép")
+ph = round(random.uniform(6.5, 8.5), 2)
+turbidity = round(random.uniform(0, 5), 2)
+temp = round(random.uniform(25, 35), 1)
 
-    with col5:
-        temp = st.slider("Nhiệt độ (°C)", 0.0, 100.0, 25.0)
-        if temp < 10 or temp > 45:
-            st.warning("⚠️ Nhiệt độ bất thường")
-        else:
-            st.success("✅ Nhiệt độ ổn định")
+st.write(_("- Độ pH:", "- pH level:"), ph)
+st.write(_("- Độ đục (NTU):", "- Turbidity (NTU):"), turbidity)
+st.write(_("- Nhiệt độ (°C):", "- Temperature (°C):"), temp)
 
-    # Hiển thị giai đoạn xử lý nước
-    st.markdown("---")
-    st.subheader("🧪 Giai đoạn xử lý nước")
-    giai_doan = st.radio("Chọn giai đoạn:", [
-        "1. Tiếp nhận nước thải",
-        "2. Xử lý cơ học",
-        "3. Xử lý sinh học",
-        "4. Lắng và khử trùng",
-        "5. Thoát nước sạch ra môi trường"
-    ])
-    st.info(f"Đang ở giai đoạn: {giai_doan}")
+if 6.5 <= ph <= 8.5 and turbidity < 5 and 25 <= temp <= 35:
+    st.success(_("✔️ Nước đạt chuẩn theo QCVN.", "✔️ Water meets QCVN standards."))
+else:
+    st.error(_("❌ Nước KHÔNG đạt chuẩn!", "❌ Water does NOT meet standards!"))
 
-    # Hiển thị dữ liệu nhận được từ thiết bị
-    st.markdown("---")
-    st.subheader("📥 Dữ liệu cảm biến nhận được")
-    st.write("(Ví dụ: hiển thị dữ liệu từ cảm biến, thiết bị IoT...)")
+st.markdown("### 🔄 " + _("Giai đoạn xử lý hiện tại:", "Current treatment stage:"))
+processing_stage = random.choice([
+    _("Lắng sơ cấp", "Primary Sedimentation"),
+    _("Lọc sinh học", "Biological Filtration"),
+    _("Khử trùng", "Disinfection"),
+    _("Lắng thứ cấp", "Secondary Sedimentation")
+])
+st.info(processing_stage)
+
+# --- HIỂN THỊ DỮ LIỆU CẢM BIẾN (cuối giao diện) ---
+st.markdown("---")
+st.markdown("## 📥 " + _("Dữ liệu cảm biến nhận được", "Sensor Data Received"))
+
+sensor_data = {
+    _("pH", "pH"): ph,
+    _("Độ đục", "Turbidity"): turbidity,
+    _("Nhiệt độ", "Temperature"): temp
+}
+
+st.table(sensor_data)
