@@ -5,7 +5,7 @@ import requests
 # --- Cấu hình giao diện ---
 st.set_page_config(page_title="Wastewater Treatment WebApp", layout="wide")
 
-# --- Kiểm tra mật khẩu ---
+# --- Giao diện đăng nhập nhỏ gọn ---
 def check_password():
     def password_entered():
         if st.session_state["password"] == "123456":
@@ -13,12 +13,19 @@ def check_password():
         else:
             st.session_state["password_correct"] = False
 
-    if "password_correct" not in st.session_state:
-        st.text_input("🔐 Nhập mật khẩu:", type="password", on_change=password_entered, key="password")
-        return False
-    elif not st.session_state["password_correct"]:
-        st.text_input("🔐 Nhập mật khẩu:", type="password", on_change=password_entered, key="password")
-        st.error("❌ Sai mật khẩu!")
+    if "password_correct" not in st.session_state or not st.session_state["password_correct"]:
+        st.markdown("<br><br>", unsafe_allow_html=True)  # tạo khoảng cách trên cùng
+        with st.container():
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                st.image("logo.png", width=80)
+            with col2:
+                st.markdown("<h3 style='margin-bottom: 5px; color:#0072B2'>HỆ THỐNG XỬ LÝ NƯỚC THẢI</h3>", unsafe_allow_html=True)
+                st.markdown("<small style='color: gray;'>FACULTY OF INTERNATIONAL EDUCATION</small>", unsafe_allow_html=True)
+                st.text_input("🔐 Mật khẩu:", type="password", on_change=password_entered, key="password")
+
+        if "password_correct" in st.session_state and not st.session_state["password_correct"]:
+            st.error("❌ Sai mật khẩu!")
         return False
     else:
         return True
