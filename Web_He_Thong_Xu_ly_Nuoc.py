@@ -49,17 +49,40 @@ with st.expander("🛠️ Điều khiển động cơ"):
     with col1:
         if st.button("🟢 BẬT BƠM"):
             try:
-                requests.get("http://192.168.1.100/pump?state=on")
+                requests.get("http://192.168.1.100/pump?state=on", timeout=2)
                 st.success("✅ Đã gửi yêu cầu bật bơm.")
             except:
                 st.error("❌ Không thể kết nối ESP32.")
     with col2:
         if st.button("🔴 TẮT BƠM"):
             try:
-                requests.get("http://192.168.1.100/pump?state=off")
+                requests.get("http://192.168.1.100/pump?state=off", timeout=2)
                 st.success("✅ Đã gửi yêu cầu tắt bơm.")
             except:
                 st.error("❌ Không thể kết nối ESP32.")
+
+# --- Báo trạng thái động cơ ---
+st.markdown("## 📢 Trạng thái động cơ")
+try:
+    response = requests.get("http://192.168.1.100/pump/status", timeout=2)  # ESP32 trả JSON
+    if response.status_code == 200:
+        status_data = response.json()
+        motor_status = status_data.get("motor", "unknown")
+        error_flag = status_data.get("error", False)
+
+        if error_flag:
+            st.error("🚨 CẢNH BÁO: Động cơ gặp sự cố! Dừng ngay để kiểm tra.")
+        else:
+            if motor_status == "on":
+                st.success("🟢 Động cơ đang hoạt động bình thường.")
+            elif motor_status == "off":
+                st.warning("🔴 Động cơ đang tắt.")
+            else:
+                st.info("ℹ️ Không xác định trạng thái động cơ.")
+    else:
+        st.error("⚠️ Không thể đọc trạng thái từ ESP32.")
+except:
+    st.error("❌ Mất kết nối với ESP32.")
 
 # --- Dữ liệu cảm biến ---
 st.markdown("## 📈 Giám sát thông số cảm biến")
@@ -124,5 +147,3 @@ st.markdown(
     "<center><small>© 2025 - Thiết kế bởi Sinh viên Kỹ thuật - Trường Đại học SPKT TP.HCM</small></center>",
     unsafe_allow_html=True
 )
-
-
