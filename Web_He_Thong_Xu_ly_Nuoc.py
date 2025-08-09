@@ -3,20 +3,7 @@ from datetime import datetime
 import requests
 
 # --- Cấu hình giao diện ---
-st.set_page_config(page_title="Hệ Thống Xử Lý Nước Thải", layout="wide")
-
-# --- Giao diện logo + tiêu đề luôn hiển thị ---
-with st.container():
-    col1, col2 = st.columns([1, 8])
-    with col1:
-        st.image("logo.png", width=100)
-    with col2:
-        st.markdown("""
-            <div style='text-align: left; padding-top: 10px'>
-                <h1 style='color:#0072B2; margin-bottom: 5px;'>HỆ THỐNG XỬ LÝ NƯỚC THẢI 💧</h1>
-                <h4 style='color: gray;'>FACULTY OF INTERNATIONAL EDUCATION</h4>
-            </div>
-        """, unsafe_allow_html=True)
+st.set_page_config(page_title="Wastewater Treatment WebApp", layout="wide")
 
 # --- Kiểm tra mật khẩu ---
 def check_password():
@@ -27,11 +14,11 @@ def check_password():
             st.session_state["password_correct"] = False
 
     if "password_correct" not in st.session_state:
-        st.text_input("🔐 Nhập mật khẩu để truy cập hệ thống:", type="password", on_change=password_entered, key="password")
+        st.text_input("🔐 Nhập mật khẩu:", type="password", on_change=password_entered, key="password")
         return False
     elif not st.session_state["password_correct"]:
-        st.text_input("🔐 Nhập mật khẩu để truy cập hệ thống:", type="password", on_change=password_entered, key="password")
-        st.error("❌ Sai mật khẩu! Vui lòng thử lại.")
+        st.text_input("🔐 Nhập mật khẩu:", type="password", on_change=password_entered, key="password")
+        st.error("❌ Sai mật khẩu!")
         return False
     else:
         return True
@@ -39,7 +26,20 @@ def check_password():
 if not check_password():
     st.stop()
 
-# --- Hiển thị thời gian ---
+# --- Giao diện tiêu đề logo ---
+with st.container():
+    col1, col2 = st.columns([1, 8])
+    with col1:
+        st.image("logo.png", width=100)
+    with col2:
+        st.markdown("""
+            <div style='text-align: left; padding-top: 10px'>
+                <h1 style='color:#0072B2; margin-bottom: 5px;'>HỆ THỐNG XỬ LÝ NƯỚC THẢI </h1>
+                <h4 style='color: gray;'>FACULTY OF INTERNATIONAL EDUCATION</h4>
+            </div>
+        """, unsafe_allow_html=True)
+
+# --- Thời gian hiện tại ---
 st.markdown(f"⏰ <i>{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</i>", unsafe_allow_html=True)
 st.markdown("---")
 
@@ -61,7 +61,7 @@ with st.expander("🛠️ Điều khiển động cơ"):
             except:
                 st.error("❌ Không thể kết nối ESP32.")
 
-# --- Dữ liệu cảm biến (giả lập) ---
+# --- Dữ liệu cảm biến ---
 st.markdown("## 📈 Giám sát thông số cảm biến")
 ph = 7.2
 turbidity = 2.8
@@ -77,27 +77,37 @@ st.markdown("## ✅ Kiểm tra theo tiêu chuẩn nước")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.success("✔️ pH đạt chuẩn.") if 6.5 <= ph <= 8.5 else st.error("⚠️ pH vượt giới hạn!")
+    if 6.5 <= ph <= 8.5:
+        st.success("✔️ pH đạt chuẩn.")
+    else:
+        st.error("⚠️ pH vượt giới hạn!")
 
 with col2:
-    st.success("✔️ Độ đục đạt chuẩn.") if turbidity < 5 else st.error("⚠️ Độ đục cao!")
+    if turbidity < 5:
+        st.success("✔️ Độ đục đạt chuẩn.")
+    else:
+        st.error("⚠️ Độ đục cao!")
 
 with col3:
-    st.success("✔️ Nhiệt độ ổn định.") if 25 <= temperature <= 35 else st.warning("⚠️ Nhiệt độ không bình thường!")
+    if 25 <= temperature <= 35:
+        st.success("✔️ Nhiệt độ ổn định.")
+    else:
+        st.warning("⚠️ Nhiệt độ không bình thường!")
 
 # --- Giai đoạn xử lý ---
 st.markdown("## 🔄 Giai đoạn xử lý hiện tại")
-giai_doan = "Khử trùng"
-icon = {
+giai_doan = "Khử trùng"  # Thay đổi được tùy hệ thống
+giai_doan_map = {
     "Tiếp nhận": "📥",
     "Lắng": "🧪",
     "Lọc": "🧼",
     "Khử trùng": "☢️",
     "Xả thải": "🏞️"
-}.get(giai_doan, "🔄")
+}
+icon = giai_doan_map.get(giai_doan, "🔄")
 st.info(f"{icon} Đang ở giai đoạn: **{giai_doan}**")
 
-# --- Dữ liệu từ ESP32 ---
+# --- Hiển thị dữ liệu ESP32 ---
 st.markdown("---")
 with st.expander("📥 Dữ liệu mới nhất từ ESP32"):
     st.code({
@@ -114,3 +124,5 @@ st.markdown(
     "<center><small>© 2025 - Thiết kế bởi Sinh viên Kỹ thuật - Trường Đại học SPKT TP.HCM</small></center>",
     unsafe_allow_html=True
 )
+
+
